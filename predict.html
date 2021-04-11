@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UAO Skin Lesion Analyzer</title>
+    <style>
+        * {
+            font-size:30px;
+        }
+    </style>
+</head>
+<body>    
+    <input id="image-selector" type="file">    
+    <button id="predict-button">Predict</button>
+    <p style="font-weight:bold">Predictions</p>    
+    <p>Melanocytic Nevi: <span id="Melanocytic_Nevi-prediction"></span></p>
+    <p>Melanoma: <span id="Melanoma-prediction"></span></p>
+    <p>Benign keratosis-like lesions: <span id="Benign_keratosis_like_lesions-prediction"></span></p>
+    <p>Basal cell carcinoma: <span id="Basal_cell_carcinoma-prediction"></span></p>
+    <p>Actinic keratoses: <span id="Actinic_keratoses-prediction"></span></p>
+    <p>Vascular lesions: <span id="Vascular_lesions-prediction"></span></p>
+    <p>Dermatofibroma: <span id="Dermatofibroma-prediction"></span></p>
+    <img id="selected-image" src=""/>
+       
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        let base64Image;
+        $("#image-selector").change(function() {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let dataURL = reader.result;
+                $('#selected-image').attr("src", dataURL);
+                base64Image = dataURL.replace("data:image/png;base64,","");
+                console.log(base64Image);
+            }
+            reader.readAsDataURL($("#image-selector")[0].files[0]);
+            $("#Melanocytic_Nevi-prediction").text("");
+            $("#Melanoma-prediction").text("");
+            $("#Benign_keratosis_like_lesions-prediction").text("");
+            $("#Basal_cell_carcinoma-prediction").text("");
+            $("#Actinic_keratoses-prediction").text("");
+            $("#Vascular_lesions-prediction").text("");
+            $("#Dermatofibroma-prediction").text("");           
+            
+        });
+        
+        $("#predict-button").click(function(){
+            let message = {
+                image: base64Image
+            }
+            console.log(message);
+            $.post("http://192.168.20.21:5000/predict", JSON.stringify(message), function(response){
+                $("#Melanocytic_Nevi-prediction").text(response.prediction.Melanocytic_Nevi.toFixed(6));
+                $("#Melanoma-prediction").text(response.prediction.Melanoma.toFixed(6));
+                $("#Benign_keratosis_like_lesions-prediction").text(response.prediction.Benign_keratosis_like_lesions.toFixed(6));
+                $("#Basal_cell_carcinoma-prediction").text(response.prediction.Basal_cell_carcinoma.toFixed(6));
+                $("#Actinic_keratoses-prediction").text(response.prediction.Actinic_keratoses.toFixed(6));
+                $("#Vascular_lesions-prediction").text(response.prediction.Vascular_lesions.toFixed(6));
+                $("#Dermatofibroma-prediction").text(response.prediction.Dermatofibroma.toFixed(6));
+                console.log(response);
+            });
+        });       
+    </script>
+</body>
+</html>
